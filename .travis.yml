@@ -43,10 +43,6 @@ jobs:
           packages:
             - "python3"
             - "python3-pip"
-        sonarcloud:
-          organization: "primeap"
-          token:
-            secure: "Na/jQCcdDnnWWK8SSiRbCzzpi1rV+oFf09OELCzwafM+5sHgu8yyaKDy2g4SJBuuMa7thKHc/ISUkg7vhnGFka+2oMEwX1dMm8HBdwZRfsWWpEhcbN8N6V0SeB6IFzFayGuLyLMiwSH2Lct+0Ncdfy8brPAh4jQiWtFN405MGX/c8gia7q3tw2hU1HJJyvRMGFAXyU5S8FJZgXDqL1WHYkEUlPESbIRRRsRAVFGBBAlbCicRVMKZN6wN6REnes+tqQjoL3lHCDlR6TBnKZSU02fW3Bn5XV2DrUy05NmOenfyigCVf6RmYMdhr42CKSMEwVEnjKP/DxCID39ew5YUCYa3oPsAq7tDKvfkqcsO/K8zcu6NBpKNFMPnKbWcs85RQ41xhzbjBUy495K4COND8v+n7Xy+Qisth5Jooi92ufBCvs1ewkdeu9SnT22h/pIq4QHe1G+1DeAVTwJ3rX9LuI116OtO0tE3hBZd+HfiwjlmwlwPSvy2lXet9fUaMCkpSel1xSYzFB54C+6vyi3GP9Cu2Il1JtBiwqUQBGBhqWCzFkbU5DmKnKgh+tEVUCMROf+jpMoywUMaT1tyImWZkxKCSS00+T4Qs2/Fh1Sd3OH5Dx5u8SeCa1caZUNu7MvZF+liD3c59M606FqC06Eeb9JJ4bOdRCjTKuvyzmUE5Lk="
       before_install:
         - pip3 install --upgrade pip
         - pip3 install --upgrade awscli --user
@@ -74,10 +70,6 @@ jobs:
           packages:
             - "python3"
             - "python3-pip"
-        sonarcloud:
-          organization: "tandfgroup"
-          token:
-            secure: "Na/jQCcdDnnWWK8SSiRbCzzpi1rV+oFf09OELCzwafM+5sHgu8yyaKDy2g4SJBuuMa7thKHc/ISUkg7vhnGFka+2oMEwX1dMm8HBdwZRfsWWpEhcbN8N6V0SeB6IFzFayGuLyLMiwSH2Lct+0Ncdfy8brPAh4jQiWtFN405MGX/c8gia7q3tw2hU1HJJyvRMGFAXyU5S8FJZgXDqL1WHYkEUlPESbIRRRsRAVFGBBAlbCicRVMKZN6wN6REnes+tqQjoL3lHCDlR6TBnKZSU02fW3Bn5XV2DrUy05NmOenfyigCVf6RmYMdhr42CKSMEwVEnjKP/DxCID39ew5YUCYa3oPsAq7tDKvfkqcsO/K8zcu6NBpKNFMPnKbWcs85RQ41xhzbjBUy495K4COND8v+n7Xy+Qisth5Jooi92ufBCvs1ewkdeu9SnT22h/pIq4QHe1G+1DeAVTwJ3rX9LuI116OtO0tE3hBZd+HfiwjlmwlwPSvy2lXet9fUaMCkpSel1xSYzFB54C+6vyi3GP9Cu2Il1JtBiwqUQBGBhqWCzFkbU5DmKnKgh+tEVUCMROf+jpMoywUMaT1tyImWZkxKCSS00+T4Qs2/Fh1Sd3OH5Dx5u8SeCa1caZUNu7MvZF+liD3c59M606FqC06Eeb9JJ4bOdRCjTKuvyzmUE5Lk="
       before_install:
         - pip3 install --upgrade pip
         - pip3 install --upgrade awscli --user
@@ -110,7 +102,3 @@ jobs:
         - mvn clean package -DskipTests
         - bash dockerPublish.sh
         - echo "Publishing Docker image to ECR Completed"
-
-
-
-
