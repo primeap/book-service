@@ -1,0 +1,116 @@
+git:
+  depth: false
+
+env:
+  global:
+    - PROJECT_NAME=book-service
+    - ENV=`if [[ "$TRAVIS_BRANCH" == "master" ]]; then echo "dev"; elif [[ "$TRAVIS_BRANCH" == "prod" ]]; then echo "prod"; elif [[ "$TRAVIS_BRANCH" == "uat" ]]; then echo "uat"; fi`
+    - ECR_PROJECT_NAME=books-app
+    - ECR_REPO=553665018584.dkr.ecr.us-east-1.amazonaws.com/apps
+    - AWS_REGION=us-east-1
+    - ECS_SERVICE_NAME=Product-Service-Routledge-API-$ENV
+    - ECS_CLUSTER_NAME=clu-use1-ap-pe-df-products-service-routledge-$ENV
+    - PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -DforceStdout -q)
+    - ECS_TASK_DEF=td-products-service-routledge-api-task-$ENV
+
+install: true
+
+stages:
+  - name: prepare cache
+    if: branch IN (master)
+  - name: build
+    if: branch IN (master, /^hotfix.*$/)
+  - name: publish
+    if: branch IN (master, /^hotfix.*$/) AND type NOT IN (pull_request)
+  - name: deploy
+    if: branch IN (master, dev, uat, prod) AND type NOT IN (pull_request)
+
+jobs:
+  include:
+    - stage: prepare cache
+      name: "Prepare cache"
+      cache:
+        directories:
+          - "$HOME/.m2"
+          - "$HOME/.sonar/cache"
+      services:
+        - docker
+      sudo: required
+      language: java
+      jdk: openjdk11
+      addons:
+        apt:
+          packages:
+            - "python3"
+            - "python3-pip"
+        sonarcloud:
+          organization: "primeap"
+          token:
+            secure: "Na/jQCcdDnnWWK8SSiRbCzzpi1rV+oFf09OELCzwafM+5sHgu8yyaKDy2g4SJBuuMa7thKHc/ISUkg7vhnGFka+2oMEwX1dMm8HBdwZRfsWWpEhcbN8N6V0SeB6IFzFayGuLyLMiwSH2Lct+0Ncdfy8brPAh4jQiWtFN405MGX/c8gia7q3tw2hU1HJJyvRMGFAXyU5S8FJZgXDqL1WHYkEUlPESbIRRRsRAVFGBBAlbCicRVMKZN6wN6REnes+tqQjoL3lHCDlR6TBnKZSU02fW3Bn5XV2DrUy05NmOenfyigCVf6RmYMdhr42CKSMEwVEnjKP/DxCID39ew5YUCYa3oPsAq7tDKvfkqcsO/K8zcu6NBpKNFMPnKbWcs85RQ41xhzbjBUy495K4COND8v+n7Xy+Qisth5Jooi92ufBCvs1ewkdeu9SnT22h/pIq4QHe1G+1DeAVTwJ3rX9LuI116OtO0tE3hBZd+HfiwjlmwlwPSvy2lXet9fUaMCkpSel1xSYzFB54C+6vyi3GP9Cu2Il1JtBiwqUQBGBhqWCzFkbU5DmKnKgh+tEVUCMROf+jpMoywUMaT1tyImWZkxKCSS00+T4Qs2/Fh1Sd3OH5Dx5u8SeCa1caZUNu7MvZF+liD3c59M606FqC06Eeb9JJ4bOdRCjTKuvyzmUE5Lk="
+      before_install:
+        - pip3 install --upgrade pip
+        - pip3 install --upgrade awscli --user
+      before_script:
+        - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        - aws configure set region $AWS_REGION
+      script:
+        - echo "Downloading and caching project dependencies"
+        - mvn dependency:go-offline
+
+    - stage: build
+      name: "Build JAR, run unit tests and integration tests"
+      cache:
+        directories:
+          - "$HOME/.m2"
+          - "$HOME/.sonar/cache"
+      services:
+        - docker
+      sudo: required
+      language: java
+      jdk: openjdk11
+      addons:
+        apt:
+          packages:
+            - "python3"
+            - "python3-pip"
+        sonarcloud:
+          organization: "tandfgroup"
+          token:
+            secure: "Na/jQCcdDnnWWK8SSiRbCzzpi1rV+oFf09OELCzwafM+5sHgu8yyaKDy2g4SJBuuMa7thKHc/ISUkg7vhnGFka+2oMEwX1dMm8HBdwZRfsWWpEhcbN8N6V0SeB6IFzFayGuLyLMiwSH2Lct+0Ncdfy8brPAh4jQiWtFN405MGX/c8gia7q3tw2hU1HJJyvRMGFAXyU5S8FJZgXDqL1WHYkEUlPESbIRRRsRAVFGBBAlbCicRVMKZN6wN6REnes+tqQjoL3lHCDlR6TBnKZSU02fW3Bn5XV2DrUy05NmOenfyigCVf6RmYMdhr42CKSMEwVEnjKP/DxCID39ew5YUCYa3oPsAq7tDKvfkqcsO/K8zcu6NBpKNFMPnKbWcs85RQ41xhzbjBUy495K4COND8v+n7Xy+Qisth5Jooi92ufBCvs1ewkdeu9SnT22h/pIq4QHe1G+1DeAVTwJ3rX9LuI116OtO0tE3hBZd+HfiwjlmwlwPSvy2lXet9fUaMCkpSel1xSYzFB54C+6vyi3GP9Cu2Il1JtBiwqUQBGBhqWCzFkbU5DmKnKgh+tEVUCMROf+jpMoywUMaT1tyImWZkxKCSS00+T4Qs2/Fh1Sd3OH5Dx5u8SeCa1caZUNu7MvZF+liD3c59M606FqC06Eeb9JJ4bOdRCjTKuvyzmUE5Lk="
+      before_install:
+        - pip3 install --upgrade pip
+        - pip3 install --upgrade awscli --user
+      before_script:
+        - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        - aws configure set region $AWS_REGION
+      script:
+        - echo "Building JAR and testing"
+        - mvn clean verify
+
+
+    - stage: publish
+      name: "Publish Docker image to ECR"
+      cache:
+        directories:
+          - "$HOME/.m2"
+      dist: xenial
+      language: python
+      python:
+        - "3.6.7"
+      before_install:
+        - pip3 install --upgrade awscli
+      before_script:
+        - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        - aws configure set region $AWS_REGION
+      script:
+        - echo "Publishing Docker image to ECR Started"
+        - mvn clean package -DskipTests
+        - bash dockerPublish.sh
+        - echo "Publishing Docker image to ECR Completed"
+
+
+
+
