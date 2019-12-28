@@ -79,7 +79,7 @@ jobs:
         - aws configure set region $AWS_REGION
       script:
         - echo "Building JAR and testing"
-        - mvn clean verify
+        - mvn clean verify -DskipTests
 
 
     - stage: publish
